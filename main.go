@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/redpandaathome/learngo/accounts"
+	"github.com/redpandaathome/learngo/mydict"
 )
 
 func multiply(a, b int) int {
@@ -140,17 +140,43 @@ func main() {
 	// account := banking.Account{Owner: "yumi", Balance: 100}
 	// fmt.Println(account)
 
-	account := accounts.NewAccount("yumi")
-	fmt.Println(account)
-	account.Deposit(10)
-	fmt.Println(account.Balance())
-	err := account.Withdraw(11)
+	// account := accounts.NewAccount("yumi")
+	// fmt.Println(account)
+	// account.Deposit(10)
+	// fmt.Println(account.Balance())
+	// err := account.Withdraw(11)
+	// if err != nil {
+	// 	// log.Fatalln(err)
+	// 	fmt.Println(err)
+	// }
+	// fmt.Println(account.Balance(), account.Owner())
+	// account.ChangeOwner("yodi")
+	// fmt.Println(account.Balance(), account.Owner())
+	// fmt.Println(account.String())
+
+	//Dict
+	dictionary := mydict.Dictionary{"first": "First word"}
+	// dictionary["hello"] = "hello"
+	definition1, err1 := dictionary.Search("first")
+	definition2, err2 := dictionary.Search("second")
+	if err1 != nil {
+		fmt.Println(err1)
+	}
+	if err2 != nil {
+		fmt.Println(err2)
+	}
+	fmt.Println(definition1, definition2)
+
+	word := "food"
+	definition := "love"
+	err := dictionary.Add(word, definition)
 	if err != nil {
-		// log.Fatalln(err)
 		fmt.Println(err)
 	}
-	fmt.Println(account.Balance(), account.Owner())
-	account.ChangeOwner("yodi")
-	fmt.Println(account.Balance(), account.Owner())
-	fmt.Println(account.String())
+	love, _ := dictionary.Search(word)
+	fmt.Println("found:", word, "def:", love)
+	err3 := dictionary.Add(word, definition)
+	if err3 != nil {
+		fmt.Println(err3)
+	}
 }
