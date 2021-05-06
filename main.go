@@ -7,19 +7,22 @@ import (
 
 func main() {
 	//go channel
-	c := make(chan bool)
+	c := make(chan string)
 	people := [2]string{"yodi", "jordi"}
 	for _, person := range people {
 		go isCute(person, c)
 	}
 	// result := <-c
 	// fmt.Println(result)
-	fmt.Println(<-c)
-	fmt.Println(<-c)
+	// waiting for a msg...(BLOCKING OPERATION)
+	resultOne := <-c
+	resultTwo := <-c
+	fmt.Println("Received...", resultOne)
+	fmt.Println("Received...", resultTwo)
 
 }
 
-func isCute(person string, c chan bool) {
-	time.Sleep(time.Second * 5)
-	c <- true
+func isCute(person string, c chan string) {
+	time.Sleep(time.Second * 3)
+	c <- person + " is cute"
 }
