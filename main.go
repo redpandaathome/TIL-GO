@@ -157,26 +157,43 @@ func main() {
 	//Dict
 	dictionary := mydict.Dictionary{"first": "First word"}
 	// dictionary["hello"] = "hello"
-	definition1, err1 := dictionary.Search("first")
-	definition2, err2 := dictionary.Search("second")
-	if err1 != nil {
-		fmt.Println(err1)
-	}
-	if err2 != nil {
-		fmt.Println(err2)
-	}
-	fmt.Println(definition1, definition2)
+	// definition1, err1 := dictionary.Search("first")
+	// definition2, err2 := dictionary.Search("second")
+	// if err1 != nil {
+	// 	fmt.Println(err1)
+	// }
+	// if err2 != nil {
+	// 	fmt.Println(err2)
+	// }
+	// fmt.Println(definition1, definition2)
 
 	word := "food"
 	definition := "love"
-	err := dictionary.Add(word, definition)
+	// err := dictionary.Add(word, definition)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
+	// love, _ := dictionary.Search(word)
+	// fmt.Println("found:", word, "def:", love)
+	// err3 := dictionary.Add(word, definition)
+	// if err3 != nil {
+	// 	fmt.Println(err3)
+	// }
+
+	// 💜 update
+	dictionary.Add(word, definition)
+	err := dictionary.Update(word, "everything")
 	if err != nil {
 		fmt.Println(err)
 	}
-	love, _ := dictionary.Search(word)
-	fmt.Println("found:", word, "def:", love)
-	err3 := dictionary.Add(word, definition)
-	if err3 != nil {
-		fmt.Println(err3)
+
+	deleteErr := dictionary.Delete("food")
+	if deleteErr != nil {
+		fmt.Println(deleteErr)
 	}
+	check, searchErr := dictionary.Search(word)
+	if searchErr != nil {
+		fmt.Println(searchErr)
+	}
+	fmt.Println(check)
 }

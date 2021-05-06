@@ -1,11 +1,17 @@
 package mydict
 
-import "errors"
+import (
+	"errors"
+)
 
 type Dictionary map[string]string
 
-var errNotFound = errors.New("Not Found...")
-var errWordExists = errors.New("Word Exists...")
+var (
+	errNotFound   = errors.New("Not Found...")
+	errWordExists = errors.New("Word Exists...")
+	errCantUpdate = errors.New("Can't update non-existing word")
+	errCantDelete = errors.New("Can't delete non-existing word")
+)
 
 func (d Dictionary) Search(word string) (string, error) {
 	value, exists := d[word]
@@ -32,4 +38,30 @@ func (d Dictionary) Add(word, def string) error {
 	// 	return errWordExists
 	// }
 	// return nil
+}
+
+func (d Dictionary) Update(word string, def string) error {
+	_, err := d.Search(word)
+	switch err {
+	case nil:
+		d[word] = def
+	case errNotFound:
+		return errCantUpdate
+	}
+	return nil
+	// if err != nil {
+	// 	return errNotFound
+	// }
+	// fmt.Println(word, "got successfully updated to ", def)
+	// d[word] = def
+	// return nil
+}
+
+func (d Dictionary) Delete(word string) error {
+	_, err := d.Search(word)
+	if err == errNotFound {
+		return errCantDelete
+	}
+	delete(d, word)
+	return nil
 }
