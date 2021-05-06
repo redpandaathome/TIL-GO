@@ -14,15 +14,15 @@ func main() {
 	}
 	// result := <-c
 	// fmt.Println(result)
-	// waiting for a msg...(BLOCKING OPERATION)
-	resultOne := <-c
-	resultTwo := <-c
-	fmt.Println("Received...", resultOne)
-	fmt.Println("Received...", resultTwo)
+	// receiving a msg...(BLOCKING OPERATION)
+	for i := 0; i < len(people); i++ {
+		fmt.Println("waiting for...", i)
+		fmt.Println(<-c)
+	}
 
 }
 
 func isCute(person string, c chan string) {
-	time.Sleep(time.Second * 3)
+	time.Sleep(time.Second * 5)
 	c <- person + " is cute"
 }
