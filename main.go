@@ -13,7 +13,7 @@ import (
 )
 
 type extractedJob struct {
-	id       string
+	url      string
 	title    string
 	location string
 	salary   string
@@ -24,10 +24,9 @@ var baseURL string = "https://uk.indeed.com/jobs?q=golang&l=United+Kingdom"
 
 func main() {
 	var jobs []extractedJob
-	// totalPages := getPages()
-
-	// for i := 0; i < totalPages; i++ {
-	for i := 0; i < 1; i++ {
+	totalPages := getPages()
+	for i := 0; i < totalPages; i++ {
+		// for i := 0; i < 1; i++ {
 		extractedJobs := getPage(i)
 		jobs = append(jobs, extractedJobs...)
 	}
@@ -44,12 +43,12 @@ func writeJobs(jobs []extractedJob) {
 	w := csv.NewWriter(file)
 	defer w.Flush()
 
-	headers := []string{"Id", "Title", "Location", "Salary", "Summary"}
+	headers := []string{"URL", "Title", "Location", "Salary", "Summary"}
 	errWrite := w.Write(headers)
 	checkErr(errWrite)
 	for _, job := range jobs {
 
-		jobSlice := []string{job.id, job.title, job.location, job.salary, job.sumamry}
+		jobSlice := []string{job.url, job.title, job.location, job.salary, job.sumamry}
 		errJobWrite := w.Write(jobSlice)
 		checkErr(errJobWrite)
 	}
@@ -79,15 +78,16 @@ func getPage(page int) []extractedJob {
 }
 
 func extractJob(card *goquery.Selection) extractedJob {
-	id, _ := card.Attr("data-jk")
+	id, _ := card.Find("h2>a").Attr("href")
+	url := "https://uk.indeed.com" + id
 	title := cleanString(card.Find(".title>a").Text())
 	location := cleanString(card.Find(".location").Text())
 	salary := cleanString(card.Find(".salaryText").Text())
 	summary := cleanString(card.Find(".summary>ul>li").Text())
 
-	fmt.Println(id, title, location, salary, summary)
+	fmt.Println(url, title, location, salary, summary)
 	return extractedJob{
-		id,
+		url,
 		title,
 		location,
 		salary,
