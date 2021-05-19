@@ -36,7 +36,7 @@ func main() {
 		jobs = append(jobs, extractedJobs...)
 	}
 
-	// writeJobs(jobs)
+	writeJobs(jobs)
 	fmt.Println("DONE! ", len(jobs))
 }
 
