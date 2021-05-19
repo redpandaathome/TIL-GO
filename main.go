@@ -8,6 +8,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/PuerkitoBio/goquery"
 )
@@ -23,6 +24,7 @@ type extractedJob struct {
 var baseURL string = "https://uk.indeed.com/jobs?q=golang&l=United+Kingdom"
 
 func main() {
+	startTime := time.Now()
 	var jobs []extractedJob
 	c := make(chan []extractedJob)
 	totalPages := getPages()
@@ -38,6 +40,16 @@ func main() {
 
 	writeJobs(jobs)
 	fmt.Println("DONE! ", len(jobs))
+	endTime := time.Now()
+	fmt.Println("Operation time: ", endTime.Sub(startTime))
+
+	// writing + channel 전 기록 📝
+	// 	DONE!  75
+	// Operation time:  7.520386795s
+
+	// writing + channel 후 기록 📝
+	// DONE!  75
+	// Operation time:  5.684296518s
 }
 
 // 2. Each page URL
@@ -112,6 +124,7 @@ func getPages() int {
 
 func writeJobs(jobs []extractedJob) {
 	//💜
+	c := make(chan []string)
 	file, err := os.Create("jobs.csv")
 	checkErr(err)
 
@@ -123,10 +136,18 @@ func writeJobs(jobs []extractedJob) {
 	checkErr(errWrite)
 	for _, job := range jobs {
 		//✨ go routine으로 개선해보기.
-		jobSlice := []string{job.url, job.title, job.location, job.salary, job.sumamry}
-		errJobWrite := w.Write(jobSlice)
+		go writeJobDetail(job, c)
+	}
+
+	for i := 0; i < len(jobs); i++ {
+		jobData := <-c
+		errJobWrite := w.Write(jobData)
 		checkErr(errJobWrite)
 	}
+}
+
+func writeJobDetail(job extractedJob, c chan<- []string) {
+	c <- []string{job.url, job.title, job.location, job.salary, job.sumamry}
 }
 
 func checkErr(err error) {
