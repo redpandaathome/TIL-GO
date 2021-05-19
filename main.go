@@ -24,38 +24,24 @@ var baseURL string = "https://uk.indeed.com/jobs?q=golang&l=United+Kingdom"
 
 func main() {
 	var jobs []extractedJob
+	c := make(chan []extractedJob)
 	totalPages := getPages()
 	for i := 0; i < totalPages; i++ {
-		// for i := 0; i < 1; i++ {
-		extractedJobs := getPage(i)
+		go getPage(i, c)
+		// jobs = append(jobs, c...)
+	}
+
+	for i := 0; i < totalPages; i++ {
+		extractedJobs := <-c
 		jobs = append(jobs, extractedJobs...)
 	}
-	// fmt.Println(jobs)
-	writeJobs(jobs)
+
+	// writeJobs(jobs)
 	fmt.Println("DONE! ", len(jobs))
 }
 
-func writeJobs(jobs []extractedJob) {
-	//💜
-	file, err := os.Create("jobs.csv")
-	checkErr(err)
-
-	w := csv.NewWriter(file)
-	defer w.Flush()
-
-	headers := []string{"URL", "Title", "Location", "Salary", "Summary"}
-	errWrite := w.Write(headers)
-	checkErr(errWrite)
-	for _, job := range jobs {
-
-		jobSlice := []string{job.url, job.title, job.location, job.salary, job.sumamry}
-		errJobWrite := w.Write(jobSlice)
-		checkErr(errJobWrite)
-	}
-}
-
 // 2. Each page URL
-func getPage(page int) []extractedJob {
+func getPage(page int, mainC chan<- []extractedJob) {
 	var jobs []extractedJob
 	//✨
 	c := make(chan extractedJob)
@@ -74,13 +60,13 @@ func getPage(page int) []extractedJob {
 	searchCards.Each(func(i int, card *goquery.Selection) {
 		go extractJob(card, c)
 	})
-	fmt.Println("searchCards...", searchCards)
+
 	for i := 0; i < searchCards.Length(); i++ {
 		job := <-c
 		jobs = append(jobs, job)
 	}
 
-	return jobs
+	mainC <- jobs
 }
 
 func extractJob(card *goquery.Selection, c chan<- extractedJob) {
@@ -91,7 +77,7 @@ func extractJob(card *goquery.Selection, c chan<- extractedJob) {
 	salary := cleanString(card.Find(".salaryText").Text())
 	summary := cleanString(card.Find(".summary>ul>li").Text())
 
-	fmt.Println(url, title, location, salary, summary)
+	// fmt.Println(url, title, location, salary, summary)
 	// return extractedJob{
 	// ✨
 	c <- extractedJob{
@@ -122,6 +108,25 @@ func getPages() int {
 		pages = s.Find("a").Length()
 	})
 	return pages
+}
+
+func writeJobs(jobs []extractedJob) {
+	//💜
+	file, err := os.Create("jobs.csv")
+	checkErr(err)
+
+	w := csv.NewWriter(file)
+	defer w.Flush()
+
+	headers := []string{"URL", "Title", "Location", "Salary", "Summary"}
+	errWrite := w.Write(headers)
+	checkErr(errWrite)
+	for _, job := range jobs {
+		//✨ go routine으로 개선해보기.
+		jobSlice := []string{job.url, job.title, job.location, job.salary, job.sumamry}
+		errJobWrite := w.Write(jobSlice)
+		checkErr(errJobWrite)
+	}
 }
 
 func checkErr(err error) {
